@@ -1,0 +1,83 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-sand text-ink font-body antialiased;
+    background-image:
+      radial-gradient(circle at 1px 1px, rgba(11,79,71,0.05) 1px, transparent 0);
+    background-size: 22px 22px;
+  }
+  h1, h2, h3, h4 {
+    @apply font-display text-ink;
+  }
+  :focus-visible {
+    outline: 2px solid #E2A63B;
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+  ::selection {
+    background: #E2A63B;
+    color: #0B4F47;
+  }
+}
+
+@layer components {
+  /* Signature element: a torn-ticket-stub card, echoing the logo's ticket icon.
+     Two semicircle "punch" notches on the left/right edges + a dashed
+     perforation line, like a real event ticket. */
+  .stub-card {
+    position: relative;
+    border-radius: 20px;
+  }
+  .stub-notch {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: #F7F2E7;
+    transform: translateY(-50%);
+    box-shadow: inset 0 0 0 1px rgba(11,79,71,0.08);
+    z-index: 5;
+  }
+  .stub-notch--left { left: -13px; }
+  .stub-notch--right { right: -13px; }
+
+  .perf-divider {
+    border-left: 2px dashed #DCD2BC;
+  }
+
+  .stub-edge-top::before {
+    content: '';
+    position: absolute;
+    inset-inline: 0;
+    top: 0;
+    height: 1px;
+    background-image: repeating-linear-gradient(to right, #DCD2BC 0 8px, transparent 8px 16px);
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-full bg-teal-900 px-5 py-2.5 text-sm font-semibold text-sand transition-colors hover:bg-teal-700 disabled:cursor-not-allowed disabled:opacity-50;
+  }
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-full border border-teal-900/20 bg-transparent px-5 py-2.5 text-sm font-semibold text-teal-900 transition-colors hover:bg-teal-900/5 disabled:cursor-not-allowed disabled:opacity-50;
+  }
+  .btn-amber {
+    @apply inline-flex items-center justify-center gap-2 rounded-full bg-amber-500 px-5 py-2.5 text-sm font-semibold text-teal-950 transition-colors hover:bg-amber-400;
+  }
+  .field-label {
+    @apply mb-1.5 block text-xs font-semibold uppercase tracking-wide text-teal-900/70;
+  }
+  .field-input {
+    @apply w-full rounded-xl border border-teal-900/15 bg-white px-3.5 py-2.5 text-sm text-ink placeholder:text-ink/35 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20;
+  }
+  .card {
+    @apply rounded-2xl border border-teal-900/10 bg-white shadow-card;
+  }
+}
