@@ -35,9 +35,9 @@ export default function AppHeader() {
   return (
     <header className="sticky top-0 z-40 border-b border-teal-900/10 bg-sand/90 backdrop-blur-sm">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3.5 sm:px-6">
-        <Link to="/" className="flex shrink-0 items-center gap-2.5">
-          <Logo size={34} />
-          <span className="hidden font-display text-lg font-semibold text-teal-950 sm:inline">TicketQR</span>
+        <Link to="/" className="flex min-w-0 shrink-0 items-center gap-2">
+          <Logo size={30} className="shrink-0" />
+          <span className="truncate font-display text-base font-semibold text-teal-950 sm:text-lg">TicketQR</span>
         </Link>
 
         <nav className="hidden items-center gap-1 md:flex">

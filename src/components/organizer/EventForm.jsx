@@ -3,15 +3,39 @@ import toast from 'react-hot-toast';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
 
-export default function EventForm({ count, onCreated }) {
+const toDatetimeLocal = (iso) => {
+  if (!iso) return '';
+  const d = new Date(iso);
+  const pad = (n) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+};
+
+// event fourni => mode édition (onSaved / onCancel). Sinon => mode création
+// (count / onCreated), comportement inchangé par rapport à avant.
+export default function EventForm({ event, count, onCreated, onSaved, onCancel }) {
   const { user } = useAuth();
-  const [form, setForm] = useState({ name: '', description: '', event_date: '', venue: '', ticket_price: '' });
+  const isEdit = !!event;
+  const [form, setForm] = useState({
+    name: event?.name || '',
+    description: event?.description || '',
+    event_date: toDatetimeLocal(event?.event_date) || '',
+    venue: event?.venue || '',
+    ticket_price: event?.ticket_price ?? '',
+  });
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
   const set = (key, value) => setForm((v) => ({ ...v, [key]: value }));
-  const atLimit = count >= 5;
+  const atLimit = !isEdit && count >= 5;
+
+  const uploadImageIfAny = async () => {
+    if (!file) return undefined;
+    const path = `${user.id}/${Date.now()}-${file.name}`;
+    const { error: uploadError } = await supabase.storage.from('event-media').upload(path, file);
+    if (uploadError) throw new Error('upload');
+    return supabase.storage.from('event-media').getPublicUrl(path).data.publicUrl;
+  };
 
   const submit = async (e) => {
     e.preventDefault();
@@ -19,30 +43,44 @@ export default function EventForm({ count, onCreated }) {
     setLoading(true);
     setError('');
 
-    let ticket_image_url = '';
-    if (file) {
-      const path = `${user.id}/${Date.now()}-${file.name}`;
-      const { error: uploadError } = await supabase.storage.from('event-media').upload(path, file);
-      if (uploadError) {
-        setError("L'envoi de la photo a échoué. Réessayez.");
-        setLoading(false);
+    let ticket_image_url;
+    try {
+      ticket_image_url = await uploadImageIfAny();
+    } catch {
+      setError("L'envoi de la photo a échoué. Réessayez.");
+      setLoading(false);
+      return;
+    }
+
+    const payload = {
+      name: form.name,
+      description: form.description,
+      event_date: new Date(form.event_date).toISOString(),
+      venue: form.venue,
+      ticket_price: Number(form.ticket_price),
+      ...(ticket_image_url ? { ticket_image_url } : {}),
+    };
+
+    if (isEdit) {
+      const { data, error: updateError } = await supabase
+        .from('events')
+        .update(payload)
+        .eq('id', event.id)
+        .select()
+        .single();
+      setLoading(false);
+      if (updateError) {
+        setError("La mise à jour de l'événement a échoué.");
         return;
       }
-      ticket_image_url = supabase.storage.from('event-media').getPublicUrl(path).data.publicUrl;
+      toast.success('Événement mis à jour');
+      onSaved?.(data);
+      return;
     }
 
     const { data, error: insertError } = await supabase
       .from('events')
-      .insert({
-        created_by: user.id,
-        name: form.name,
-        description: form.description,
-        event_date: new Date(form.event_date).toISOString(),
-        venue: form.venue,
-        ticket_price: Number(form.ticket_price),
-        ticket_image_url,
-        status: 'published',
-      })
+      .insert({ ...payload, created_by: user.id, ticket_image_url: ticket_image_url || '', status: 'published' })
       .select()
       .single();
 
@@ -58,7 +96,7 @@ export default function EventForm({ count, onCreated }) {
     toast.success('Événement publié');
     setForm({ name: '', description: '', event_date: '', venue: '', ticket_price: '' });
     setFile(null);
-    onCreated(data);
+    onCreated?.(data);
   };
 
   return (
@@ -84,16 +122,23 @@ export default function EventForm({ count, onCreated }) {
         <textarea id="description" required rows={3} className="field-input" value={form.description} onChange={(e) => set('description', e.target.value)} />
       </div>
       <div>
-        <label className="field-label" htmlFor="ticket_image">Photo exemple du ticket</label>
+        <label className="field-label" htmlFor="ticket_image">
+          Photo exemple du ticket {isEdit && <span className="normal-case text-ink/40">(laisser vide pour garder l'actuelle)</span>}
+        </label>
         <input id="ticket_image" type="file" accept="image/*" className="field-input file:mr-3 file:rounded-full file:border-0 file:bg-teal-900 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-sand" onChange={(e) => setFile(e.target.files[0])} />
       </div>
       <div className="flex items-end">
         {error && <p className="text-sm text-rust-500">{error}</p>}
       </div>
-      <div className="md:col-span-2">
+      <div className="flex gap-3 md:col-span-2">
         <button disabled={loading || atLimit} className="btn-primary w-full sm:w-auto">
-          {atLimit ? 'Limite de 5 événements atteinte' : loading ? 'Publication…' : "Publier l'événement"}
+          {atLimit ? 'Limite de 5 événements atteinte' : loading ? 'Enregistrement…' : isEdit ? 'Enregistrer les modifications' : "Publier l'événement"}
         </button>
+        {isEdit && (
+          <button type="button" onClick={onCancel} className="btn-secondary w-full sm:w-auto">
+            Annuler
+          </button>
+        )}
       </div>
     </form>
   );
