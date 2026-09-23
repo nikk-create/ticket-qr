@@ -5,7 +5,7 @@ import Logo from '@/components/Logo';
 import { useAuth } from '@/lib/AuthContext';
 
 const navLinks = [
-  { to: '/', label: 'Événements', icon: CalendarDays },
+  { to: '/events', label: 'Événements', icon: CalendarDays },
   { to: '/dashboard', label: 'Tableau de bord', icon: LayoutDashboard, auth: true },
   { to: '/reservations', label: 'Réservations', icon: Ticket, auth: true },
 ];

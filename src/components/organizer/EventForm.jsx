@@ -12,7 +12,7 @@ const toDatetimeLocal = (iso) => {
 
 // event fourni => mode édition (onSaved / onCancel). Sinon => mode création
 // (count / onCreated), comportement inchangé par rapport à avant.
-export default function EventForm({ event, count, onCreated, onSaved, onCancel }) {
+export default function EventForm({ event, count, limit = 5, onCreated, onSaved, onCancel }) {
   const { user } = useAuth();
   const isEdit = !!event;
   const [form, setForm] = useState({
@@ -27,7 +27,7 @@ export default function EventForm({ event, count, onCreated, onSaved, onCancel }
   const [error, setError] = useState('');
 
   const set = (key, value) => setForm((v) => ({ ...v, [key]: value }));
-  const atLimit = !isEdit && count >= 5;
+  const atLimit = !isEdit && count >= limit;
 
   const uploadImageIfAny = async () => {
     if (!file) return undefined;
@@ -132,7 +132,7 @@ export default function EventForm({ event, count, onCreated, onSaved, onCancel }
       </div>
       <div className="flex gap-3 md:col-span-2">
         <button disabled={loading || atLimit} className="btn-primary w-full sm:w-auto">
-          {atLimit ? 'Limite de 5 événements atteinte' : loading ? 'Enregistrement…' : isEdit ? 'Enregistrer les modifications' : "Publier l'événement"}
+          {atLimit ? "Limite de votre plan atteinte" : loading ? "Enregistrement…" : isEdit ? "Enregistrer les modifications" : "Publier l'événement"}
         </button>
         {isEdit && (
           <button type="button" onClick={onCancel} className="btn-secondary w-full sm:w-auto">

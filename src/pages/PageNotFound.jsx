@@ -10,7 +10,7 @@ export default function PageNotFound() {
       <p className="max-w-sm text-sm text-ink/55">
         Ce lien n'existe plus ou l'événement a peut-être été retiré par son organisateur.
       </p>
-      <Link to="/" className="btn-primary">Retour aux événements</Link>
+      <Link to="/" className="btn-primary">Retour à l'accueil</Link>
     </div>
   );
 }

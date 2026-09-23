@@ -1,39 +1,66 @@
-import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { CalendarDays, MapPin } from 'lucide-react';
-import { supabase } from '@/lib/supabaseClient';
-import { useAuth } from '@/lib/AuthContext';
-import { formatDateTime } from '@/lib/utils';
-import AppHeader from '@/components/AppHeader';
-import EventForm from '@/components/organizer/EventForm';
+import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { CalendarDays, MapPin } from "lucide-react";
+import { supabase } from "@/lib/supabaseClient";
+import { useAuth } from "@/lib/AuthContext";
+import { formatDateTime } from "@/lib/utils";
+import AppHeader from "@/components/AppHeader";
+import EventForm from "@/components/organizer/EventForm";
+
+const PLAN_LIMITS = { none: 0, decouverte: 1, pro: 5, illimite: Infinity };
+const PLAN_LABELS = { none: "Aucun", decouverte: "Découverte", pro: "Pro", illimite: "Illimité" };
 
 export default function Organizer() {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const [events, setEvents] = useState(null);
 
   useEffect(() => {
     supabase
-      .from('events')
-      .select('*')
-      .eq('created_by', user.id)
-      .order('created_at', { ascending: false })
+      .from("events")
+      .select("*")
+      .eq("created_by", user.id)
+      .order("created_at", { ascending: false })
       .then(({ data }) => setEvents(data || []));
   }, [user.id]);
+
+  const plan = profile?.plan || "none";
+  const limit = PLAN_LIMITS[plan] ?? 0;
 
   return (
     <>
       <AppHeader />
       <main className="mx-auto max-w-6xl space-y-10 px-4 py-10 sm:px-6">
-        <div>
-          <h1 className="font-display text-3xl font-semibold text-ink">Espace organisateur</h1>
-          <p className="mt-1 text-sm text-ink/55">
-            {events ? `${events.length}/5 événements créés` : '…'}
-          </p>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h1 className="font-display text-3xl font-semibold text-ink">Espace organisateur</h1>
+            <p className="mt-1 text-sm text-ink/55">
+              {events ? `${events.length}/${limit === Infinity ? "∞" : limit} événements créés` : "…"}
+              {" · "}Plan {PLAN_LABELS[plan]}
+            </p>
+          </div>
+          <Link to="/organizer/subscribe" className="btn-secondary">
+            {plan === "none" ? "Choisir un abonnement" : "Changer d'abonnement"}
+          </Link>
         </div>
 
         <section>
           <h2 className="mb-4 font-display text-xl font-semibold text-ink">Créer un événement</h2>
-          <EventForm count={events?.length || 0} onCreated={(e) => setEvents([e, ...(events || [])])} />
+          {plan === "none" ? (
+            <div className="card p-6 text-center">
+              <p className="text-sm text-ink/60">
+                Vous devez activer un abonnement avant de publier votre premier événement.
+              </p>
+              <Link to="/organizer/subscribe" className="btn-primary mt-4 inline-flex">
+                Voir les plans
+              </Link>
+            </div>
+          ) : (
+            <EventForm
+              count={events?.length || 0}
+              limit={limit}
+              onCreated={(e) => setEvents([e, ...(events || [])])}
+            />
+          )}
         </section>
 
         <section>
