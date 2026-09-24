@@ -127,7 +127,7 @@ export default function EventAdmin() {
           <h2 className="mb-3 font-display text-xl font-semibold text-ink">Offrir des tickets</h2>
           <GiftForm event={event} onDone={load} />
           {gifts.length > 0 && (
-            <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="mt-4 grid gap-4 grid-cols-[repeat(auto-fill,minmax(300px,1fr))]">
               {gifts.map((t) => <TicketCard key={t.id} ticket={t} event={event} />)}
             </div>
           )}

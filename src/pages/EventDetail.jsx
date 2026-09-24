@@ -65,7 +65,7 @@ export default function EventDetail() {
             ) : (
               <div>
                 <h2 className="mb-4 font-display text-xl font-semibold text-ink">Vos tickets</h2>
-                <div className="grid gap-4 sm:grid-cols-2">
+                <div className="grid gap-4 grid-cols-[repeat(auto-fill,minmax(300px,1fr))]">
                   {tickets.map((t) => <TicketCard key={t.id} ticket={t} event={event} />)}
                 </div>
                 <p className="mt-4 text-xs leading-relaxed text-ink/45">

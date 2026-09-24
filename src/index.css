@@ -126,4 +126,62 @@
   .card {
     @apply rounded-2xl border border-teal-900/10 bg-white shadow-card;
   }
+
+  /* Carte de ticket horizontale : image/infos à gauche, QR à droite,
+     séparées par le motif encoches + pointillés tourné à la verticale. */
+  .ticket {
+    position: relative;
+    display: flex;
+    overflow: hidden;
+  }
+  .ticket-main {
+    flex: 1;
+    min-width: 0;
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .ticket-top { display: flex; gap: 12px; align-items: center; }
+  .ticket-thumb {
+    width: 56px; height: 56px; border-radius: 12px; object-fit: cover; flex-shrink: 0;
+    background: #EAF3F1;
+  }
+  .ticket-thumb.placeholder {
+    display: flex; align-items: center; justify-content: center; color: #0B4F47; opacity: .35;
+  }
+  .ticket-name {
+    font-size: 17px; font-weight: 500; line-height: 1.2;
+    overflow: hidden; text-overflow: ellipsis; display: -webkit-box;
+    -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  }
+  .ticket-venue { font-size: 11.5px; color: rgba(18,36,32,.5); margin-top: 2px; }
+  .ticket-meta { display: flex; gap: 18px; padding-top: 10px; border-top: 1px dashed var(--stub, #DCD2BC); }
+  .ticket-meta > div { flex: 1; }
+  .ticket-meta .k { font-size: 10px; text-transform: uppercase; letter-spacing: .06em; color: rgba(18,36,32,.4); font-weight: 700; }
+  .ticket-meta .v { font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; color: #122420; margin-top: 2px; }
+  .ticket-divider { position: relative; width: 0; flex-shrink: 0; border-left: 2px dashed #DCD2BC; }
+  .ticket-notch {
+    position: absolute; left: 50%; width: 22px; height: 22px; border-radius: 999px;
+    background: var(--sand-bg, #F7F2E7); transform: translateX(-50%);
+  }
+  .ticket-notch.top { top: -11px; }
+  .ticket-notch.bottom { bottom: -11px; }
+  .ticket-qr-side {
+    width: 138px; flex-shrink: 0; padding: 16px 14px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+    background: #EAF3F1;
+  }
+  .ticket-qr-side img { width: 88px; height: 88px; border-radius: 8px; box-shadow: 0 1px 2px rgba(11,79,71,.08); }
+  .ticket-status { font-size: 10.5px; font-weight: 700; border-radius: 999px; padding: 3px 10px; text-align: center; white-space: nowrap; }
+  .ticket-email { font-size: 10px; color: rgba(18,36,32,.4); text-align: center; word-break: break-all; }
+  .ticket-downloads { display: flex; gap: 6px; margin-top: 2px; }
+  @media (max-width: 360px) {
+    .ticket { flex-direction: column; }
+    .ticket-divider { width: auto; height: 0; border-left: none; border-top: 1px dashed #DCD2BC; }
+    .ticket-notch { left: auto; top: 50%; transform: translateY(-50%); }
+    .ticket-notch.top { left: -11px; top: 50%; }
+    .ticket-notch.bottom { left: auto; right: -11px; top: 50%; }
+    .ticket-qr-side { width: 100%; flex-direction: row; justify-content: space-between; padding: 12px 16px; }
+  }
 }
